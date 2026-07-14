@@ -7,10 +7,12 @@ import (
 	"os"
 	"runtime/debug"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-fuego/fuego"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"github.com/vpmv/chargepoint-api/internal/api"
+	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
 )
 
 func Recover() func(h http.Handler) http.Handler {
@@ -69,14 +71,30 @@ func New(ctx context.Context, api *api.API, hostAddr string, options ...func(*fu
 			fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{
 				SwaggerURL: `/openapi`,
 				SpecURL:    `/openapi/openapi.json`,
-				UIHandler:  openApiHandler,
+				Info: &openapi3.Info{
+					Title:       `ChargePoint API`,
+					Description: `Demo application`,
+					Contact: &openapi3.Contact{
+						Name:  `Valentijn V.`,
+						URL:   `https://valentijn.co`,
+						Email: `contact@valentijn.co`,
+					},
+
+					Version: "v1",
+				},
+				//UIHandler: openApiHandler,
 			}),
 		),
 	}
+
 	options = append(serverOptions, options...)
 
 	app := fuego.NewServer(options...)
 	api.Security = app.Security
+
+	if openapiHost := env.GetString(`OPENAPI_HOST`, ``); len(openapiHost) > 0 {
+		app.OpenAPI.Description().Servers = append(app.OpenAPI.Description().Servers, &openapi3.Server{URL: openapiHost})
+	}
 
 	fuego.Use(app, Recover())
 	fuego.Use(app, chiMiddleware.Compress(5, "application/json"))
