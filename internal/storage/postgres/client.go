@@ -35,7 +35,16 @@ func (c Client) GetChargePoints(page, pageSize int) (*dto.ChargePoints, error) {
 }
 
 func (c Client) GetChargePoint(id string) (*dto.ChargePoint, error) {
-	panic("implement me")
+	var cp ChargePoint
+	if err := c.db.First(&cp, "id = ?", id).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return nil, err
+		} else {
+			return nil, nil
+		}
+	}
+
+	return chargePointToDTO(&cp), nil
 }
 
 func (c Client) CreateChargePoints(chargePoints *dto.ChargePoints) (*dto.ChargePoints, error) {
