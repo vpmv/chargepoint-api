@@ -30,6 +30,25 @@ func (c *ChargePoint) OutTransform(ctx context.Context) error {
 	return nil
 }
 
+type ChargePoints []*ChargePoint
+
+func (s ChargePoints) InTransform(ctx context.Context) error {
+	for i := range s {
+		_ = s[i].InTransform(ctx)
+	}
+	return nil
+}
+
+func (s ChargePoints) OutTransform(ctx context.Context) error {
+	for i := range s {
+		_ = s[i].OutTransform(ctx)
+	}
+	return nil
+}
+
 // type safety checks
 var _ fuego.InTransformer = (*ChargePoint)(nil)
 var _ fuego.OutTransformer = (*ChargePoint)(nil)
+
+var _ fuego.InTransformer = (*ChargePoints)(nil)
+var _ fuego.OutTransformer = (*ChargePoints)(nil)

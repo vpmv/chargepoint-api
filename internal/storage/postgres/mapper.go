@@ -4,7 +4,16 @@ import (
 	"strconv"
 
 	"github.com/vpmv/chargepoint-api/internal/dto"
+	"github.com/vpmv/chargepoint-api/internal/storage"
 )
+
+func dtoSliceToModel(dto []*dto.ChargePoint) []*ChargePoint {
+	return storage.MapSlice(dto, dtoToChargePoint)
+}
+
+func chargePointsToDTOSlice(model []*ChargePoint) []*dto.ChargePoint {
+	return storage.MapSlice(model, chargePointToDTO)
+}
 
 func dtoToChargePoint(dto *dto.ChargePoint) *ChargePoint {
 	c := &ChargePoint{

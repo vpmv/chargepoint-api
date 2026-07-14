@@ -65,7 +65,7 @@ func (api *API) Bootstrap(server *fuego.Server, ctx context.Context) {
 	v1 := fuego.Group(server, `/v1`, option.Header(`Authorization`, `Bearer token`, param.Required()))
 	fuego.Use(v1, api.bearerAuthorization)
 
-	// /v1/chargepoint/...
+	// /v1/chargepoints
 	chargePointGroup := fuego.Group(v1, `/chargepoints`)
 	fuego.Use(
 		chargePointGroup,
@@ -73,7 +73,7 @@ func (api *API) Bootstrap(server *fuego.Server, ctx context.Context) {
 	)
 
 	fuego.Get(chargePointGroup, ``, api.ListChargePoints, optionPagination)
-	fuego.Post(chargePointGroup, ``, api.CreateChargePoint, option.Middleware(api.hasPermission(PermissionCreateCP)))
+	fuego.Post(chargePointGroup, ``, api.CreateChargePoints, option.Middleware(api.hasPermission(PermissionCreateCP)))
 	fuego.Get(chargePointGroup, `/:id`, api.GetChargePointByID)
 	//fuego.Put(chargePointGroup, `/:id`, api.UpdateChargePoint)
 	//fuego.Delete(chargePointGroup, `/:id`, api.DeleteChargePoint)

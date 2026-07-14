@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -25,7 +24,7 @@ func (s chargePointStatus) String() string {
 
 type ChargePoint struct {
 	gorm.Model
-	VendorId  string
+	VendorId  string `gorm:"unique"`
 	Name      string
 	Latitude  float64
 	Longitude float64
