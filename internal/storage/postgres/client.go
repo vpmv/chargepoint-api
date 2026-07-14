@@ -3,13 +3,20 @@ package postgres
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/vpmv/chargepoint-api/internal/dto"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func NewClient(config Config, logger *logrus.Logger) (*Client, error) {
-	return &Client{}, nil
+	if db, err := gorm.Open(postgres.Open(config.DSN()), &gorm.Config{}); err == nil {
+		return &Client{db, logger}, err
+	} else {
+		return nil, err
+	}
 }
 
 type Client struct {
+	db  *gorm.DB
 	log *logrus.Logger
 }
 
@@ -34,5 +41,5 @@ func (c Client) GetChargePointByLocation(latitude, longitude float64, radiusKm i
 }
 
 func (c Client) Migrate() error {
-	panic("implement me")
+	return c.db.AutoMigrate(&ChargePoint{})
 }

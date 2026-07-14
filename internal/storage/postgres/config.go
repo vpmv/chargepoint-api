@@ -11,7 +11,7 @@ type Config struct {
 }
 
 func (cfg Config) DSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DB,
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+		cfg.Host, cfg.User, cfg.Password, cfg.DB, cfg.Port,
 	)
 }
