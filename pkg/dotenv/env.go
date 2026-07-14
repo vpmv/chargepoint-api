@@ -21,6 +21,7 @@ func LoadEnvironment(baseDir string, files ...string) {
 		if err := godotenv.Load(baseDir + file); err != nil && !errors.Is(err, os.ErrNotExist) {
 			panic(`Error loading environment file(s):` + err.Error())
 		}
+
 	}
 }
 
@@ -28,10 +29,10 @@ func IsEnv(s string) bool {
 	return GetString(`ENV`, `development`) == s
 }
 
-func GetString(key, def string) string {
+func GetString(key, defaultValue string) string {
 	v := os.Getenv(key)
 	if v == `` {
-		return def
+		return defaultValue
 	}
 	return v
 }

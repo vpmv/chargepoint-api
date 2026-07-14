@@ -1,0 +1,37 @@
+services:
+  go:
+    build:
+      context: .
+    depends_on:
+      - postgres
+    volumes:
+      - ./config:/config:ro
+      - ./doc:/doc:rw
+    ports:
+      - 8989:80
+    networks:
+#      dev_proxy:
+      default:
+        aliases:
+          - chargepoint-api
+
+  postgres:
+    image: postgis/postgis:18-3.6-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: 'cpuser'
+      POSTGRES_PASSWORD: 'secret'
+      POSTGRES_DB: chargepoint_db
+    volumes:
+      - postgresdb:/var/lib/postgresql
+#      - ./docker/mysql/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+#    networks:
+#      dev_proxy:
+
+volumes:
+  postgresdb:
+
+
+#networks:
+#  dev_proxy:
+#    external: true

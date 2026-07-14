@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
 
 	"github.com/logrusorgru/aurora"
 
@@ -39,14 +38,14 @@ func (auth *SimpleAuthenticator) AuthenticateBearer(apiKey string) (*authenticat
 }
 
 func init() {
-	configDir := flag.String(`basedir`, `/config`, `Base dir for configurations`)
+	configDir := flag.String(`basedir`, `/config/`, `Base dir for configurations`)
 	flag.Parse()
 
 	env.LoadEnvironment(*configDir)
 }
 
 func main() {
-	loglevel, err := logrus.ParseLevel(os.Getenv("LOG_LEVEL"))
+	loglevel, err := logrus.ParseLevel(env.GetString(`LOG_LEVEL`, `info`))
 	if err != nil {
 		panic(`invalid log level: ` + err.Error())
 	}
@@ -69,21 +68,22 @@ func main() {
 	}
 
 	store, err := postgres.NewClient(postgres.Config{
-		Host:     os.Getenv(`DB_HOST`),
-		Port:     os.Getenv(`DB_PORT`),
-		User:     os.Getenv(`DB_USER`),
-		Password: os.Getenv(`DB_PASSWORD`),
-		DB:       os.Getenv(`DB_NAME`),
+		Host:     env.GetString(`DB_HOST`, ``),
+		Port:     env.GetString(`DB_PORT`, ``),
+		User:     env.GetString(`DB_USER`, ``),
+		Password: env.GetString(`DB_PASSWORD`, ``),
+		DB:       env.GetString(`DB_NAME`, ``),
 	}, logger)
 	if err != nil {
 		logger.Fatal(`failed to connect to datastore`, err)
 	}
 
+	apiHost := env.GetString(`API_HOST`, ``)
 	a := api.New(auth, logger, store)
-	srv := server.New(context.Background(), a, os.Getenv(`API_HOST`))
+	srv := server.New(context.Background(), a, apiHost)
 
-	logger.Println("starting http listener on", aurora.Cyan(os.Getenv(`API_HOST`)))
-	logger.Printf("allowed origins %s", aurora.Yellow(os.Getenv(`ALLOWED_ORIGINS)`)))
+	logger.Println("starting http listener on", aurora.Cyan(apiHost))
+	logger.Printf("allowed origins %s", aurora.Yellow(env.GetString(`ALLOWED_ORIGINS`, `*`)))
 
 	logger.Fatal(srv.Run())
 }
