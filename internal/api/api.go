@@ -15,13 +15,6 @@ import (
 	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
 )
 
-const (
-	PermissionCreateCP = `cp.create`
-	PermissionReadCP   = `cp.read`
-)
-
-var staleJobTimeout float64 = 86400 // 1 day
-
 type API struct {
 	auth     authenticator.Authenticator
 	log      *logrus.Logger
