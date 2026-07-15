@@ -16,13 +16,20 @@ Since only need one actual resource is required, we won't be splitting up the AP
 
 Although the requirements don't speak of Authentication/Authorization, I'm implementing an some boilerplate code into the API, which should be adapted to production standards.
 
+## Task deviations
+I've deviated from the task slightly by implementing Vendor ID instead of a generic ID. I figured this would be more alike a real world scenario, where vendors reference their assets by a unique identifier. For the purpose of [seeding](#database-seeding) I used the following format:
+`<VENDOR_SHORTCODE><REGION>-<ASSETID>` e.g. `FN11-321`.
+
+I chose to use Fuego as my HTTP microframework. I'm using it because it's lightweight and easy to use; it's my go-to framework. It's also a good fit for REST APIs.
+
+The project layout may seem a bit excessive, but I wanted to keep the codebase organized and easy to navigate. I also wanted to make it easy to add new resources in the future. 
 
 ## AI disclosure
 
 I refrained from using any generative AI services (e.g. Claude, Junie, Aider) in the development of this application. The main architecture is taken from earlier applications. I used AI to aid in parts of the research and used it alongside as a sparring partner. ChatGPT was a great help in integrating PostGIS, with which I was wholly unfamiliar. 
 
 
-# Dev setup & runtime
+# Dev setup and runtime
 The application is written in Go and uses PostgreSQL as a database. It comes with a configured Docker Compose file to run the application and the database. No other setup is required.
 
 
@@ -36,7 +43,7 @@ docker compose up
 
 ## Database seeding
 The database can be seeded with mock records by adding the --seed flag to the application entrypoint.
-This allows for easy functionality testing of the endpoint `/api/v1/chargepoints/location`.
+This allows for easy functionality testing, mainly of the endpoint `/api/v1/chargepoints/location`.
 
 ```yaml
 services:
@@ -49,6 +56,10 @@ The seeder adds mock records to the database. It is intended for development pur
 
 Seeded data simulates charge points by a set number of vendors, grouped by a logical number of regions. You can alter the amount of records per vendor region, with the environment variable SEED_COUNT. The default value is 100, times 10 regions = 1000 records.
 
+## Documentation / OpenAPI
+The application automatically generates OpenAPI documentation. When the application is running, visit: https://localhost:8989/openapi to view the live documentation test suite (provided by Stoplight). The API can be extended to add more descriptions and clarifications to the interface. 
 
-## Testing
-At the time of writing, tests have not been implemented yet, but functionality has been tested manually.
+The generated documentation is automatically written to `/doc/openapi.json` on the file system. Please refer to the volume bindings in `docker-compose.yml`.
+
+## Tests
+At the time of writing, tests have not been implemented, but functionality has been tested manually.
