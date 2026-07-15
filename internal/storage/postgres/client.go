@@ -58,9 +58,9 @@ func (c Client) GetChargePoints(page, pageSize int) (dto.ChargePoints, error) {
 	return chargePointsToDTOSlice(chargePoints), nil
 }
 
-func (c Client) GetChargePoint(id string) (*dto.ChargePoint, error) {
+func (c Client) GetChargePoint(vendorID string) (*dto.ChargePoint, error) {
 	var cp ChargePoint
-	if err := c.db.First(&cp, "id = ?", id).Error; err != nil {
+	if err := c.db.First(&cp, `vendor_id = ?`, vendorID).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			return nil, err
 		} else {
@@ -88,19 +88,16 @@ func (c Client) CreateChargePoints(chargePoints dto.ChargePoints) (dto.ChargePoi
 	return chargePointsToDTOSlice(models), err
 }
 
-func (c Client) DeleteChargePoint(id string) error {
-	panic("implement me")
+func (c Client) DeleteChargePoint(vendorID string) error {
+	return c.db.Delete(&ChargePoint{}, "vendor_id = ?", vendorID).Error
 }
 
 func (c Client) GetChargePointByLocation(latitude, longitude float64, radiusKm int) (dto.ChargePoints, error) {
 	var chargePoints []*ChargePoint
 
-	err := c.db.Raw(`
+	if err := c.db.Raw(`
         SELECT
 			id,
-			created_at,
-			updated_at,
-			deleted_at,
 			name,
 			status,
 			vendor_id,
@@ -110,11 +107,13 @@ func (c Client) GetChargePointByLocation(latitude, longitude float64, radiusKm i
                 ST_SetSRID(ST_Point(@lon, @lat), 4326)::geography
             ) AS distance
         FROM charge_points
-        WHERE ST_DWithin(
-            point,
-            ST_SetSRID(ST_Point(@lon, @lat), 4326)::geography,
-            @radiusMeter
-        )
+        WHERE 
+            ST_DWithin(
+				point,
+				ST_SetSRID(ST_Point(@lon, @lat), 4326)::geography,
+				@radiusMeter
+        	) 
+          AND deleted_at IS NULL
         ORDER BY distance
     `,
 		map[string]interface{}{
@@ -122,8 +121,7 @@ func (c Client) GetChargePointByLocation(latitude, longitude float64, radiusKm i
 			`lat`:         latitude,
 			`radiusMeter`: radiusKm * 1000,
 		},
-	).Scan(&chargePoints).Error
-	if err != nil {
+	).Scan(&chargePoints).Error; err != nil {
 		return nil, err
 	}
 

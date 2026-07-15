@@ -2,6 +2,7 @@ package env
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -15,13 +16,13 @@ func LoadEnvironment(baseDir string, files ...string) {
 		os.Setenv(`ENV`, env)
 	}
 
-	files = append([]string{`.env.` + env + `.local`, `.env.` + env, `.env.local`, `.env`}, files...)
+	files = append([]string{`.env.` + env, `.env.` + env + `.local`, `.env.local`, `.env`}, files...)
 
 	for _, file := range files {
-		if err := godotenv.Load(baseDir + file); err != nil && !errors.Is(err, os.ErrNotExist) {
+		fmt.Println(file)
+		if err := godotenv.Overload(baseDir + file); err != nil && !errors.Is(err, os.ErrNotExist) {
 			panic(`Error loading environment file(s):` + err.Error())
 		}
-
 	}
 }
 

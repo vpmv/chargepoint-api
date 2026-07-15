@@ -48,7 +48,7 @@ func (api *API) Bootstrap(server *fuego.Server, ctx context.Context) {
 
 	// register CORS
 	cors := chiCORS.New(chiCORS.Options{
-		//AllowedOrigins:   strings.Split(os.Getenv(`ALLOWED_ORIGINS`), `;`),
+		// AllowedOrigins:   strings.Split(os.Getenv(`ALLOWED_ORIGINS`), `;`),
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost},
 		AllowedHeaders:   []string{"Cookie", "Accept", "Authorization", "Content-Type", "Origin"},
 		ExposedHeaders:   []string{},
@@ -74,20 +74,20 @@ func (api *API) Bootstrap(server *fuego.Server, ctx context.Context) {
 
 	fuego.Get(chargePointGroup, ``, api.ListChargePoints, optionPagination)
 	fuego.Post(chargePointGroup, ``, api.CreateChargePoints, option.Middleware(api.hasPermission(PermissionCreateCP)))
-	fuego.Get(chargePointGroup, `/{id}`, api.GetChargePointByID)
+	fuego.Get(chargePointGroup, `/{id}`, api.GetChargePointByID, option.Path(`id`, `Vendor ID`, param.Required()))
+	fuego.Delete(chargePointGroup, `/{id}`, api.DeleteChargePoint)
 	fuego.Get(chargePointGroup, `/location`, api.ListChargePointsByLocation,
 		option.QueryInt(`radius`, `radius in KM`, param.Required()),
 		option.Query(`lat`, `latitude`, param.Required()),
 		option.Query(`lon`, `longitude`, param.Required()),
 	)
-	//fuego.Delete(chargePointGroup, `/{id}`, api.DeleteChargePoint)
 
 	api.log.Debug(`API bootstrapped!`)
 }
 
 // HealthCheck is used to do server health checks outside normal api routing
 func (api *API) HealthCheck(c fuego.ContextWithBody[struct{}]) (string, error) {
-	return `tabula rasa`, nil
+	return `healthy`, nil
 }
 
 func (api *API) QueryParamUint(c fuego.ContextNoBody, param string) uint {

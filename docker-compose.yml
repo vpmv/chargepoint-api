@@ -10,7 +10,6 @@ services:
     ports:
       - 8989:80
     networks:
-#      dev_proxy:
       default:
         aliases:
           - chargepoint-api
@@ -25,14 +24,6 @@ services:
       POSTGRES_DB: chargepoint_db
     volumes:
       - postgresdb:/var/lib/postgresql
-#      - ./docker/mysql/dump.sql:/docker-entrypoint-initdb.d/dump.sql
-#    networks:
-#      dev_proxy:
 
 volumes:
   postgresdb:
-
-
-#networks:
-#  dev_proxy:
-#    external: true

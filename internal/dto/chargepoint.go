@@ -13,8 +13,7 @@ type Location struct {
 }
 
 type ChargePoint struct {
-	ID       string   `json:"id"`
-	VendorId string   `json:"vendor_id"`
+	VendorId string   `json:"id"`
 	Name     string   `json:"name"`
 	Location Location `json:"location"`
 	Status   string   `json:"status"`

@@ -26,6 +26,17 @@ func (api *API) CreateChargePoints(c fuego.ContextWithBody[dto.ChargePoints]) (*
 	return &cps, nil
 }
 
+func (api *API) DeleteChargePoint(c fuego.ContextNoBody) (string, error) {
+	id := c.PathParam("id")
+
+	err := api.store.DeleteChargePoint(id)
+	if err != nil {
+		return "", err
+	}
+
+	return "ok", nil
+}
+
 func (api *API) GetChargePointByID(c fuego.ContextNoBody) (*dto.ChargePoint, error) {
 	id := c.PathParam("id")
 
