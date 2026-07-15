@@ -83,7 +83,7 @@ func (c Client) CreateChargePoints(chargePoints dto.ChargePoints) (dto.ChargePoi
 			"status",
 			"updated_at",
 		}),
-	}).Create(&models).Error
+	}).CreateInBatches(&models, 100).Error
 
 	return chargePointsToDTOSlice(models), err
 }
