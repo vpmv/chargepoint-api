@@ -57,7 +57,7 @@ The seeder adds mock records to the database. It is intended for development pur
 Seeded data simulates charge points by a set number of vendors, grouped by a logical number of regions. You can alter the amount of records per vendor region, with the environment variable SEED_COUNT. The default value is 100, times 10 regions = 1000 records.
 
 ## Documentation / OpenAPI
-The application automatically generates OpenAPI documentation. When the application is running, visit: https://localhost:8989/openapi to view the live documentation test suite (provided by Stoplight). The API can be extended to add more descriptions and clarifications to the interface. 
+The application automatically generates OpenAPI documentation. When the application is running, visit: http://localhost:8989/openapi to view the live documentation test suite (provided by Stoplight). The API can be extended to add more descriptions and clarifications to the interface. 
 
 The generated documentation is automatically written to `/doc/openapi.json` on the file system. Please refer to the volume bindings in `docker-compose.yml`.
 
