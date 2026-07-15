@@ -2,7 +2,6 @@ package env
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strconv"
 
@@ -19,7 +18,6 @@ func LoadEnvironment(baseDir string, files ...string) {
 	files = append([]string{`.env.` + env, `.env.` + env + `.local`, `.env.local`, `.env`}, files...)
 
 	for _, file := range files {
-		fmt.Println(file)
 		if err := godotenv.Overload(baseDir + file); err != nil && !errors.Is(err, os.ErrNotExist) {
 			panic(`Error loading environment file(s):` + err.Error())
 		}
