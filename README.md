@@ -11,7 +11,7 @@ Since one of the key features is calculating point-to-point distance based on ge
 I quickly found out there's a Postgres extension specialized in calculating geographical/geometrical data: PostGIS.
 I spent a fair amount of time researching the best way to implement this, before and during development.
 
-The rest of the application can remain fairly minimal. I'm used to separating the API and backend, using DTOs (data transfer objects), making for a clean presentation layer whilst leaving implantation details within the data layer(s).
+The rest of the application can remain fairly minimal. I'm used to separating the API and backend, using DTOs (data transfer objects), making for a clean presentation layer whilst leaving implementation details within the data layer(s).
 Since only need one actual resource is required, we won't be splitting up the API further than necessary.
 
 Although the requirements don't speak of Authentication/Authorization, I'm implementing an some boilerplate code into the API, which should be adapted to production standards.
@@ -54,7 +54,14 @@ services:
 
 The seeder adds mock records to the database. It is intended for development purposes only and should not be used in production.
 
-Seeded data simulates charge points by a set number of vendors, grouped by a logical number of regions. You can alter the amount of records per vendor region, with the environment variable SEED_COUNT. The default value is 100, times 10 regions = 1000 records.
+Seeded data simulates charge points by a set number of vendors, grouped by a logical number of regions. You can alter the amount of records per vendor region, with the environment variable SEED_COUNT. The default value is 100, times 10 regions = 1000 records per vendor. There are five pre-configured vendors:
+- Shell (SH)
+- Esso (ES)
+- Gulf (GU)
+- OK
+- FastNed (FN)
+
+$R = 5 * 10 * SC$
 
 ## Documentation / OpenAPI
 The application automatically generates OpenAPI documentation. When the application is running, visit: http://localhost:8989/openapi to view the live documentation test suite (provided by Stoplight). The API can be extended to add more descriptions and clarifications to the interface. 
