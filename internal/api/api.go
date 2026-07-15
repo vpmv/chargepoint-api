@@ -75,6 +75,11 @@ func (api *API) Bootstrap(server *fuego.Server, ctx context.Context) {
 	fuego.Get(chargePointGroup, ``, api.ListChargePoints, optionPagination)
 	fuego.Post(chargePointGroup, ``, api.CreateChargePoints, option.Middleware(api.hasPermission(PermissionCreateCP)))
 	fuego.Get(chargePointGroup, `/{id}`, api.GetChargePointByID)
+	fuego.Get(chargePointGroup, `/location`, api.ListChargePointsByLocation,
+		option.QueryInt(`radius`, `radius in KM`, param.Required()),
+		option.Query(`lat`, `latitude`, param.Required()),
+		option.Query(`lon`, `longitude`, param.Required()),
+	)
 	//fuego.Delete(chargePointGroup, `/{id}`, api.DeleteChargePoint)
 
 	api.log.Debug(`API bootstrapped!`)

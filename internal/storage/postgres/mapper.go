@@ -3,6 +3,7 @@ package postgres
 import (
 	"strconv"
 
+	"github.com/restayway/gogis"
 	"github.com/vpmv/chargepoint-api/internal/dto"
 	"github.com/vpmv/chargepoint-api/internal/storage"
 )
@@ -17,10 +18,9 @@ func chargePointsToDTOSlice(model []*ChargePoint) []*dto.ChargePoint {
 
 func dtoToChargePoint(dto *dto.ChargePoint) *ChargePoint {
 	c := &ChargePoint{
-		VendorId:  dto.VendorId,
-		Name:      dto.Name,
-		Latitude:  dto.Location.Latitude,
-		Longitude: dto.Location.Longitude,
+		VendorId: dto.VendorId,
+		Name:     dto.Name,
+		Point:    gogis.Point{Lat: dto.Location.Latitude, Lng: dto.Location.Longitude},
 	}
 	c.SetStatus(dto.Status)
 
@@ -40,9 +40,10 @@ func chargePointToDTO(chargePoint *ChargePoint) *dto.ChargePoint {
 		VendorId: chargePoint.VendorId,
 		Name:     chargePoint.Name,
 		Location: dto.Location{
-			Latitude:  chargePoint.Latitude,
-			Longitude: chargePoint.Longitude,
+			Latitude:  chargePoint.Point.Lat,
+			Longitude: chargePoint.Point.Lng,
 		},
-		Status: chargePoint.Status.String(),
+		Status:   chargePoint.Status.String(),
+		Distance: chargePoint.Distance / 1000,
 	}
 }

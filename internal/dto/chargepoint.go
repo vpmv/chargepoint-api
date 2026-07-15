@@ -18,6 +18,7 @@ type ChargePoint struct {
 	Name     string   `json:"name"`
 	Location Location `json:"location"`
 	Status   string   `json:"status"`
+	Distance float64  `json:"distance,omitempty"`
 }
 
 func (c *ChargePoint) InTransform(ctx context.Context) error {

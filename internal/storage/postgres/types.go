@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"github.com/restayway/gogis"
 	"gorm.io/gorm"
 )
 
@@ -24,11 +25,11 @@ func (s chargePointStatus) String() string {
 
 type ChargePoint struct {
 	gorm.Model
-	VendorId  string `gorm:"unique"`
-	Name      string
-	Latitude  float64
-	Longitude float64
-	Status    chargePointStatus
+	Name     string
+	Status   chargePointStatus
+	VendorId string      `gorm:"uniqueIndex"`
+	Point    gogis.Point `gorm:"type:geography(Point, 4326)"`
+	Distance float64     `gorm:"column:distance;->"` // virtual field, only available for ByLocation query
 }
 
 func (c *ChargePoint) SetStatus(statusString string) {

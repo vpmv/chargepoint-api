@@ -21,17 +21,17 @@ type Client struct {
 	log *logrus.Logger
 }
 
-func (c Client) GetChargePoints(page, pageSize int) (*dto.ChargePoints, error) {
+func (c Client) GetChargePoints(page, pageSize int) (dto.ChargePoints, error) {
 	var chargePoints []*ChargePoint
-	tx := c.db.Find(&chargePoints)
-	c.paginate(tx, page, pageSize)
+
+	tx := c.paginate(c.db, page, pageSize)
+	tx.Find(&chargePoints)
 
 	if err := tx.Error; err != nil {
 		return nil, err
 	}
 
-	cps := dto.ChargePoints(chargePointsToDTOSlice(chargePoints))
-	return &cps, nil
+	return chargePointsToDTOSlice(chargePoints), nil
 }
 
 func (c Client) GetChargePoint(id string) (*dto.ChargePoint, error) {
@@ -47,43 +47,70 @@ func (c Client) GetChargePoint(id string) (*dto.ChargePoint, error) {
 	return chargePointToDTO(&cp), nil
 }
 
-func (c Client) CreateChargePoints(chargePoints *dto.ChargePoints) (*dto.ChargePoints, error) {
-	models := dtoSliceToModel(*chargePoints)
+func (c Client) CreateChargePoints(chargePoints dto.ChargePoints) (dto.ChargePoints, error) {
+	models := dtoSliceToModel(chargePoints)
 	err := c.db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
 			{Name: "vendor_id"},
 		},
 		DoUpdates: clause.AssignmentColumns([]string{
 			"name",
-			"latitude",
-			"longitude",
+			"point",
 			"status",
 			"updated_at",
 		}),
 	}).Create(&models).Error
 
-	cps := dto.ChargePoints(chargePointsToDTOSlice(models))
-	return &cps, err
+	return chargePointsToDTOSlice(models), err
 }
 
 func (c Client) DeleteChargePoint(id string) error {
 	panic("implement me")
 }
 
-func (c Client) GetChargePointByLocation(latitude, longitude float64, radiusKm int) *dto.ChargePoints {
-	panic("implement me")
+func (c Client) GetChargePointByLocation(latitude, longitude float64, radiusKm int) (dto.ChargePoints, error) {
+	var chargePoints []*ChargePoint
+
+	err := c.db.Raw(`
+        SELECT
+			id,
+			created_at,
+			updated_at,
+			deleted_at,
+			name,
+			status,
+			vendor_id,
+			point,
+            ST_Distance(
+                point,
+                ST_SetSRID(ST_Point(@lon, @lat), 4326)::geography
+            ) AS distance
+        FROM charge_points
+        WHERE ST_DWithin(
+            point,
+            ST_SetSRID(ST_Point(@lon, @lat), 4326)::geography,
+            @radiusMeter
+        )
+        ORDER BY distance
+    `,
+		map[string]interface{}{
+			`lon`:         longitude,
+			`lat`:         latitude,
+			`radiusMeter`: radiusKm * 1000,
+		},
+	).Scan(&chargePoints).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return chargePointsToDTOSlice(chargePoints), nil
 }
 
 func (c Client) Migrate() error {
 	return c.db.AutoMigrate(&ChargePoint{})
 }
 
-func (c Client) paginate(tx *gorm.DB, page, size int) {
-	offset := size * (page - 1)
-	if page == 1 {
-		offset = 1
-	}
-	limit := size
-
-	tx.Offset(offset).Limit(limit)
+func (c Client) paginate(tx *gorm.DB, page, limit int) *gorm.DB {
+	offset := limit * (page - 1)
+	return tx.Offset(offset).Limit(limit)
 }
