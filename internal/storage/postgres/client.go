@@ -1,24 +1,48 @@
 package postgres
 
 import (
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/vpmv/chargepoint-api/internal/dto"
+	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 func NewClient(config Config, logger *logrus.Logger) (*Client, error) {
-	if db, err := gorm.Open(postgres.Open(config.DSN()), &gorm.Config{}); err == nil {
-		return &Client{db, logger}, err
-	} else {
+	var (
+		retries int
+		err     error
+		db      *gorm.DB
+	)
+
+	for retries < 5 {
+		db, err = gorm.Open(postgres.Open(config.DSN()))
+		if err == nil {
+			break
+		}
+
+		logger.Info(`Waiting to retry PostgreSQL connect...`)
+		time.Sleep(5 * time.Second)
+		retries++
+	}
+
+	if err != nil {
 		return nil, err
 	}
+
+	return &Client{
+		db:  db,
+		log: logger,
+	}, err
 }
 
 type Client struct {
-	db  *gorm.DB
-	log *logrus.Logger
+	db   *gorm.DB
+	log  *logrus.Logger
+	seed bool
 }
 
 func (c Client) GetChargePoints(page, pageSize int) (dto.ChargePoints, error) {
@@ -107,7 +131,20 @@ func (c Client) GetChargePointByLocation(latitude, longitude float64, radiusKm i
 }
 
 func (c Client) Migrate() error {
-	return c.db.AutoMigrate(&ChargePoint{})
+	if err := c.db.AutoMigrate(&ChargePoint{}); err != nil {
+		return err
+	}
+
+	if c.seed {
+		seeder := NewSeeder(c, c.log)
+		return seeder.Seed(env.GetInt(`SEED_COUNT`, 100))
+	}
+
+	return nil
+}
+
+func (c *Client) MustSeed() {
+	c.seed = true
 }
 
 func (c Client) paginate(tx *gorm.DB, page, limit int) *gorm.DB {

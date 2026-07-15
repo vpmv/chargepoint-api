@@ -14,6 +14,8 @@ import (
 	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
 )
 
+var seedDatabase *bool
+
 type Config struct {
 	Env      string
 	LogLevel string
@@ -39,6 +41,7 @@ func (auth *SimpleAuthenticator) AuthenticateBearer(apiKey string) (*authenticat
 
 func init() {
 	configDir := flag.String(`basedir`, `/config/`, `Base dir for configurations`)
+	seedDatabase = flag.Bool(`seed`, false, `Seed database with test data`)
 	flag.Parse()
 
 	env.LoadEnvironment(*configDir)
@@ -76,6 +79,10 @@ func main() {
 	}, logger)
 	if err != nil {
 		logger.Fatal(`failed to connect to datastore`, err)
+	}
+
+	if seedDatabase != nil && *seedDatabase {
+		store.MustSeed()
 	}
 
 	apiHost := env.GetString(`API_HOST`, ``)

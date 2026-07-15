@@ -9,4 +9,5 @@ type ChargePointClient interface {
 	CreateChargePoints(chargePoint dto.ChargePoints) (dto.ChargePoints, error)
 	DeleteChargePoint(id string) error
 	GetChargePointByLocation(latitude, longitude float64, radiusKm int) (dto.ChargePoints, error)
+	MustSeed()
 }
