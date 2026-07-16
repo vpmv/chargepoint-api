@@ -55,7 +55,7 @@ func (api *API) Bootstrap(server *fuego.Server, ctx context.Context) {
 	// Health check
 	fuego.Get(server, "/_health", api.HealthCheck)
 
-	v1 := fuego.Group(server, `/v1`, option.Header(`Authorization`, `Bearer token`, param.Required()))
+	v1 := fuego.Group(server, `/v1`, option.Header(`Authorization`, `Usage: "Bearer \<token\>"`, param.Required()))
 	fuego.Use(v1, api.bearerAuthorization)
 
 	// /v1/chargepoints
@@ -65,14 +65,35 @@ func (api *API) Bootstrap(server *fuego.Server, ctx context.Context) {
 		api.hasPermission(PermissionReadCP),
 	)
 
-	fuego.Get(chargePointGroup, ``, api.ListChargePoints, optionPagination)
-	fuego.Post(chargePointGroup, ``, api.CreateChargePoints, option.Middleware(api.hasPermission(PermissionCreateCP)))
-	fuego.Get(chargePointGroup, `/{id}`, api.GetChargePointByID, option.Path(`id`, `Vendor ID`, param.Required()))
-	fuego.Delete(chargePointGroup, `/{id}`, api.DeleteChargePoint)
+	fuego.Get(chargePointGroup, ``, api.ListChargePoints,
+		option.Middleware(api.hasPermission(PermissionReadCP)),
+		optionPagination,
+		option.Summary(`List all charge points`),
+		option.Description(`Returns a list of charge points, within the paginated range.<br> Deleted charge points are not included`),
+	)
+	fuego.Post(chargePointGroup, ``, api.CreateChargePoints,
+		option.Middleware(api.hasPermission(PermissionCreateCP)),
+		option.Summary(`Create new charge points`),
+		option.Description(`Creates and/or updates charge points<br> Previously deleted charge points will be undeleted.`),
+	)
+	fuego.Get(chargePointGroup, `/{id}`, api.GetChargePointByID,
+		option.Middleware(api.hasPermission(PermissionReadCP)),
+		option.Path(`id`, `Vendor ID`, param.Required()),
+		option.Summary(`Get a charge point by VendorID`),
+		option.Description(`Retrieves a charge point by VendorID`),
+	)
+	fuego.Delete(chargePointGroup, `/{id}`, api.DeleteChargePoint,
+		option.Middleware(api.hasPermission(PermissionCreateCP)),
+		option.Summary(`Delete a charge point`),
+		option.Description(`Deletes a charge point by VendorID<br> Deletions aren't permanent'`),
+	)
 	fuego.Get(chargePointGroup, `/nearby`, api.ListChargePointsByLocation,
+		option.Middleware(api.hasPermission(PermissionReadCP)),
 		option.QueryInt(`radius`, `radius in KM`, param.Required()),
 		option.Query(`lat`, `latitude`, param.Required()),
 		option.Query(`lon`, `longitude`, param.Required()),
+		option.Summary(`List nearby charge points`),
+		option.Description(`Retrieves a list of all ChargePoints within a radius (kilometer) from lat/long coordinate`),
 	)
 
 	api.log.Debug(`API bootstrapped!`)

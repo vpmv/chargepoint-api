@@ -1,5 +1,6 @@
 services:
   go:
+    tty: true
     build:
       context: .
     depends_on:
