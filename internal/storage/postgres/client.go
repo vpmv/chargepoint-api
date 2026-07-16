@@ -77,11 +77,12 @@ func (c Client) CreateChargePoints(chargePoints dto.ChargePoints) (dto.ChargePoi
 		Columns: []clause.Column{
 			{Name: "vendor_id"},
 		},
-		DoUpdates: clause.AssignmentColumns([]string{
-			"name",
-			"point",
-			"status",
-			"updated_at",
+		DoUpdates: clause.Assignments(map[string]interface{}{
+			"name":       gorm.Expr("excluded.name"),
+			"point":      gorm.Expr("excluded.point"),
+			"status":     gorm.Expr("excluded.status"),
+			"updated_at": gorm.Expr("excluded.updated_at"),
+			"deleted_at": nil,
 		}),
 	}).CreateInBatches(&models, 100).Error
 
