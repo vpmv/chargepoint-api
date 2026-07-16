@@ -12,7 +12,7 @@ import (
 	"github.com/go-fuego/fuego"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"github.com/vpmv/chargepoint-api/internal/api"
-	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
+	env "github.com/vpmv/goenv"
 )
 
 func Recover() func(h http.Handler) http.Handler {
@@ -62,7 +62,7 @@ func New(ctx context.Context, api *api.API, hostAddr string, options ...func(*fu
 		// disabled AutoAuth in lieu of custom API Bearer tokens
 		// enabling this would generate an /auth/ group with user/password login
 		// returning secure signed JWT
-		//fuego.WithAutoAuth(api.Oauth),
+		// fuego.WithAutoAuth(api.Oauth),
 
 		fuego.WithRouteOptions(
 			fuego.OptionAddResponse(http.StatusForbidden, "Forbidden", fuego.Response{Type: fuego.HTTPError{}}),
@@ -82,7 +82,7 @@ func New(ctx context.Context, api *api.API, hostAddr string, options ...func(*fu
 
 					Version: "v1",
 				},
-				//UIHandler: openApiHandler,
+				// UIHandler: openApiHandler,
 			}),
 		),
 	}

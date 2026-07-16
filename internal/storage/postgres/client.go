@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/vpmv/chargepoint-api/internal/dto"
-	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
+	env "github.com/vpmv/goenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"

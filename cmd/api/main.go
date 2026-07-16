@@ -11,7 +11,7 @@ import (
 	"github.com/vpmv/chargepoint-api/internal/server"
 	"github.com/vpmv/chargepoint-api/internal/storage/postgres"
 	"github.com/vpmv/chargepoint-api/pkg/authenticator"
-	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
+	env "github.com/vpmv/goenv"
 )
 
 var (
@@ -39,7 +39,7 @@ func init() {
 	seedDatabase = flag.Bool(`seed`, false, `Seed database with test data`)
 	flag.Parse()
 
-	env.LoadEnvironment(*configDir)
+	env.LoadDotEnv(*configDir)
 }
 
 func main() {
@@ -66,11 +66,11 @@ func main() {
 	}
 
 	store, err := postgres.NewClient(postgres.Config{
-		Host:     env.GetString(`DB_HOST`, ``),
-		Port:     env.GetString(`DB_PORT`, ``),
-		User:     env.GetString(`DB_USER`, ``),
-		Password: env.GetString(`DB_PASSWORD`, ``),
-		DB:       env.GetString(`DB_NAME`, ``),
+		Host:     env.MustString(`DB_HOST`),
+		Port:     env.MustString(`DB_PORT`),
+		User:     env.MustString(`DB_USER`),
+		Password: env.MustString(`DB_PASSWORD`),
+		DB:       env.MustString(`DB_NAME`),
 	}, logger)
 	if err != nil {
 		logger.Fatal(`failed to connect to datastore`, err)

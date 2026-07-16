@@ -12,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vpmv/chargepoint-api/internal/storage"
 	"github.com/vpmv/chargepoint-api/pkg/authenticator"
-	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
+	env "github.com/vpmv/goenv"
 )
 
 type API struct {
