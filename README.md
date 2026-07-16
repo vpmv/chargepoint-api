@@ -41,6 +41,17 @@ The default application environment variables are located in /config/.env.develo
 docker compose up
 ```
 
+### Authorization
+As stated earlier, Authorization tokens have been implemented. A token provider has been omitted, since this is wildly out of scope, and replaced by a hard-coded "SimpleAuthenticator". The default token is `secret`. Please supply the token in the Authorization header:
+```shell
+curl --request GET \
+  --url http://localhost:8989/api/v1/chargepoints \
+  --header 'Accept: application/json, application/xml' \
+  --header 'Authorization: Bearer secret'
+```
+
+Or in the OpenAPI UI: `Authorization: [ Bearer secret ]`
+
 ## Database seeding
 The database can be seeded with mock records by adding the --seed flag to the application entrypoint.
 This allows for easy functionality testing, mainly of the endpoint `/api/v1/chargepoints/location`.
