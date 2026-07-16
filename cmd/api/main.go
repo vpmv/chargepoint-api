@@ -14,24 +14,19 @@ import (
 	env "github.com/vpmv/chargepoint-api/pkg/dotenv"
 )
 
-var seedDatabase *bool
-
-type Config struct {
-	Env      string
-	LogLevel string
-	DB       *postgres.Config
-}
+var (
+	seedDatabase *bool
+	logger       *logrus.Logger
+)
 
 type SimpleAuthenticator struct {
 	tokens map[string]*authenticator.Authorization
 }
 
 func (auth *SimpleAuthenticator) AuthenticateBearer(apiKey string) (*authenticator.Authorization, bool, error) {
-	// todo: remove this block
-	if env.IsEnv(`development`) {
-		return auth.tokens[`secret`], true, nil
+	if env.IsEnv(`development`) && apiKey == `` {
+		logger.Debug(aurora.Red(`No Authorization token supplied. Did you forget to prefix the token with Bearer?`))
 	}
-
 	if app, ok := auth.tokens[apiKey]; ok && app.Token == apiKey {
 		return app, true, nil
 	}
@@ -53,7 +48,7 @@ func main() {
 		panic(`invalid log level: ` + err.Error())
 	}
 
-	logger := logrus.New()
+	logger = logrus.New()
 	logger.SetLevel(loglevel)
 
 	// Create the authenticator
