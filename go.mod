@@ -12,7 +12,7 @@ require (
 	github.com/restayway/gogis v1.0.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/swaggo/http-swagger/v2 v2.0.2
-	github.com/vpmv/goenv v1.0.0
+	github.com/vpmv/go-env v1.0.1
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.2
 )
@@ -52,5 +52,6 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
+	gopkg.in/ini.v1 v1.67.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

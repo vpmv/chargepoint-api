@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/vpmv/chargepoint-api/internal/dto"
-	env "github.com/vpmv/goenv"
+	"github.com/vpmv/go-env"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -40,9 +40,8 @@ func NewClient(config Config, logger *logrus.Logger) (*Client, error) {
 }
 
 type Client struct {
-	db   *gorm.DB
-	log  *logrus.Logger
-	seed bool
+	db  *gorm.DB
+	log *logrus.Logger
 }
 
 func (c Client) GetChargePoints(page, pageSize int) (dto.ChargePoints, error) {
@@ -134,16 +133,12 @@ func (c Client) Migrate() error {
 		return err
 	}
 
-	if c.seed {
+	if env.GetBool(`DATABASE_SEED`, false) {
 		seeder := NewSeeder(c, c.log)
 		return seeder.Seed(env.GetInt(`SEED_COUNT`, 100))
 	}
 
 	return nil
-}
-
-func (c *Client) MustSeed() {
-	c.seed = true
 }
 
 func (c Client) paginate(tx *gorm.DB, page, limit int) *gorm.DB {

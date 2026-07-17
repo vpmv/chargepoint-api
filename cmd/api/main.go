@@ -11,7 +11,7 @@ import (
 	"github.com/vpmv/chargepoint-api/internal/server"
 	"github.com/vpmv/chargepoint-api/internal/storage/postgres"
 	"github.com/vpmv/chargepoint-api/pkg/authenticator"
-	env "github.com/vpmv/goenv"
+	"github.com/vpmv/go-env"
 )
 
 var (
@@ -24,7 +24,7 @@ type SimpleAuthenticator struct {
 }
 
 func (auth *SimpleAuthenticator) AuthenticateBearer(apiKey string) (*authenticator.Authorization, bool, error) {
-	if env.IsEnv(`development`) && apiKey == `` {
+	if env.IsDevelopment() && apiKey == `` {
 		logger.Debug(aurora.Red(`No Authorization token supplied. Did you forget to prefix the token with Bearer?`))
 	}
 	if app, ok := auth.tokens[apiKey]; ok && app.Token == apiKey {
@@ -77,10 +77,10 @@ func main() {
 	}
 
 	if seedDatabase != nil && *seedDatabase {
-		store.MustSeed()
+		env.Set(`DATABASE_SEED`, true)
 	}
 
-	apiHost := env.GetString(`API_HOST`, ``)
+	apiHost := env.GetString(`API_HOST`, `localhost`)
 	a := api.New(auth, logger, store)
 	srv := server.New(context.Background(), a, apiHost)
 

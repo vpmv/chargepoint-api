@@ -12,7 +12,7 @@ import (
 	"github.com/go-fuego/fuego"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"github.com/vpmv/chargepoint-api/internal/api"
-	env "github.com/vpmv/goenv"
+	"github.com/vpmv/go-env"
 )
 
 func Recover() func(h http.Handler) http.Handler {
