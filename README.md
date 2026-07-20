@@ -1,7 +1,11 @@
 ChargePoint API
----
+===
 
-Demo application
+[![Go](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vpmv/chargepoint-api/main/.github/badges/go.json)](https://github.com/vpmv/chargepoint-api)
+[![Tests](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vpmv/chargepoint-api/main/.github/badges/tests.json)](https://github.com/vpmv/chargepoint-api/actions)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vpmv/chargepoint-api/main/.github/badges/coverage.json)](https://github.com/vpmv/chargepoint-api/actions)
+[![Lint](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/vpmv/chargepoint-api/main/.github/badges/lint.json)](https://github.com/vpmv/chargepoint-api/actions)
+
 
 
 # Preface
@@ -80,4 +84,4 @@ The application automatically generates OpenAPI documentation. When the applicat
 The generated documentation is automatically written to `/doc/openapi.json` on the file system. Please refer to the volume bindings in `docker-compose.yml`.
 
 ## Tests
-At the time of writing, tests have not been implemented, but functionality has been tested manually.
+Most custom code is covered by unit tests. All the code that mainly relies on third-party libraries isn't tested further.
