@@ -1,29 +1,46 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/go-fuego/fuego"
+	"github.com/go-playground/validator/v10"
 	"github.com/vpmv/chargepoint-api/internal/dto"
 	"github.com/vpmv/chargepoint-api/internal/helpers"
 )
 
 type LocationParams struct {
-	Latitude  float64 `query:"lat" validate:"numeric,min=-90,max=90,required"`
-	Longitude float64 `query:"lon" validate:"numeric,min=-180,max=180,required"`
+	Latitude  float64 `query:"lat" validate:"numeric,min=-90,max=90,ne=0,required"`
+	Longitude float64 `query:"lon" validate:"numeric,min=-180,max=180,ne=0,required"`
 	Radius    int     `query:"radius" validate:"min=5,max=100,required"`
 }
 
 func (api *API) CreateChargePoints(c fuego.ContextWithBody[dto.ChargePoints]) (*dto.ChargePoints, error) {
-	chargePoints, err := c.Body()
+	var (
+		chargePoints dto.ChargePoints
+		err          error
+		errs         map[string]validator.ValidationErrors
+	)
+
+	chargePoints, err = c.Body()
 	if err != nil {
 		return nil, err
 	}
 
-	cps, err := api.store.CreateChargePoints(chargePoints)
+	chargePoints, errs = chargePoints.Validate(true)
+	if len(errs) > 0 {
+		api.log.Warnf("Ignoring validation errors: %s", parseValidationErrors(errs))
+	}
+	if len(chargePoints) == 0 {
+		return nil, fuego.BadRequestError{Detail: `no (valid) charge points provided`}
+	}
+
+	chargePoints, err = api.store.CreateChargePoints(chargePoints)
 	if err != nil {
 		return nil, err
 	}
 
-	return &cps, nil
+	return &chargePoints, nil
 }
 
 func (api *API) DeleteChargePoint(c fuego.ContextNoBody) (string, error) {
@@ -67,8 +84,8 @@ func (api *API) ListChargePointsByLocation(c fuego.ContextWithParams[LocationPar
 	if err != nil {
 		return nil, fuego.BadRequestError{Err: err}
 	}
-	if err := helpers.ValidateStruct(params); err != nil {
-		return nil, fuego.BadRequestError{Err: err} // fixme
+	if err := helpers.ValidateEntity(params); err != nil {
+		return nil, fuego.BadRequestError{Err: fmt.Errorf(`Invalid field "%s" - did not match rule "%s"`, err[0].StructField(), err[0].Tag())}
 	}
 
 	cps, err := api.store.GetChargePointByLocation(params.Latitude, params.Longitude, params.Radius)
@@ -78,4 +95,15 @@ func (api *API) ListChargePointsByLocation(c fuego.ContextWithParams[LocationPar
 
 	return &cps, nil
 
+}
+
+func parseValidationErrors(errs map[string]validator.ValidationErrors) string {
+	var err string
+	for id, validationErrors := range errs {
+		for _, ve := range validationErrors {
+			err += fmt.Sprintf("@ID: \"%s\" - Invalid field \"%s\" - did not match rule \"%s\" with value \"%v\"\n", id, ve.Field(), ve.Tag(), ve.Value())
+		}
+	}
+
+	return err
 }
