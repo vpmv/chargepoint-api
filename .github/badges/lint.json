@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "label": "lint",
+  "message": "failing",
+  "color": "red",
+  "namedLogo": "go"
+}
